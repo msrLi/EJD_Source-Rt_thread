@@ -51,6 +51,10 @@ menu "On-chip Peripheral Drivers"
                 select BSP_SPI1_TX_USING_DMA
                 default n
         endif
+    
+    config BSP_USING_ON_CHIP_FLASH
+        bool "Enable on-chip FLASH"
+        default n
 
     menuconfig BSP_USING_I2C1
         bool "Enable I2C1 BUS (software simulation)"

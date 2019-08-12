@@ -79,7 +79,7 @@
 
 /* C++ features */
 
-/* RT_USING_CPLUSPLUS is not set */
+#define RT_USING_CPLUSPLUS
 
 /* Command shell */
 

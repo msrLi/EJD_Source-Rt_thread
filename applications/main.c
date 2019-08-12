@@ -18,12 +18,12 @@ int main(void)
 {
     /* set LED0 pin mode to output */
     ejdLedApplication();
-    led_on(1);
-
+    // led_on(1);
+	  
     while (1)
     {
-        rt_thread_mdelay(500);
-        led_tog(1);
+        rt_thread_mdelay(300);
+        
     }
 
     return RT_EOK;

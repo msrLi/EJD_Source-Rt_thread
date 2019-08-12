@@ -21,10 +21,10 @@ static void led_threads(void *parameter)
 {
     rt_uint32_t count = 0;
     led_add_device(LED0_PIN);
-
+		led_blink(1, 100, 100);
     while (1) {
         /* 线程1采用低优先级运行，一直打印计数值 */
-        rt_kprintf("thread1 count: %d\n", count ++);
+        // rt_kprintf("thread1 count: %d\n", count ++);
         led_process(10);
         rt_thread_mdelay(10);
     }

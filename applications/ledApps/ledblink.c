@@ -147,7 +147,7 @@ void led_process(int inc)
                 //in ON STATE , do nothing
             } else if (ls[i].ison && ls[i].off_time == 0) {
                 //offtime=0; just blink once
-                ls[i].state = OFF;
+                // ls[i].state = OFF;
                 led_set_level(i + 1, !LED_ON_STATE);
             } else if (ls[i].ison && ls[i].off_time > 0) {
                 //ison = 0; offtime>0;  On state turn to off state

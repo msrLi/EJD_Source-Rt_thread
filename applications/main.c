@@ -12,21 +12,18 @@
 #include <rtdevice.h>
 #include <board.h>
 
-/* defined the LED0 pin: PD14 */
-#define LED0_PIN    GET_PIN(D, 14)
+#include "ejdLeds.h"
 
 int main(void)
 {
-    int count = 1;
     /* set LED0 pin mode to output */
-    rt_pin_mode(LED0_PIN, PIN_MODE_OUTPUT);
+    ejdLedApplication();
+    led_on(1);
 
-    while (count++)
+    while (1)
     {
-        rt_pin_write(LED0_PIN, PIN_HIGH);
         rt_thread_mdelay(500);
-        rt_pin_write(LED0_PIN, PIN_LOW);
-        rt_thread_mdelay(500);
+        led_tog(1);
     }
 
     return RT_EOK;

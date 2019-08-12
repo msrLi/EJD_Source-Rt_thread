@@ -5,8 +5,13 @@ cwd     = GetCurrentDir()
 CPPPATH = [cwd, str(Dir('#'))]
 src     = Split("""
 main.c
+ledApps/ledblink.c
+ledApps/ejdLeds.c
 """)
 
-group = DefineGroup('Applications', src, depend = [''], CPPPATH = CPPPATH)
+path    = [cwd, str(Dir('#'))] 
+path    += [cwd + '/ledApps']
+
+group = DefineGroup('Applications', src, depend = [''], CPPPATH = path)
 
 Return('group')

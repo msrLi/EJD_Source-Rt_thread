@@ -4,13 +4,15 @@ from building import *
 cwd     = GetCurrentDir()
 CPPPATH = [cwd, str(Dir('#'))]
 src     = Split("""
-main.c
+main.cpp
 ledApps/ledblink.c
 ledApps/ejdLeds.c
+printerServer/printerHard.cpp
 """)
 
 path    = [cwd, str(Dir('#'))] 
 path    += [cwd + '/ledApps']
+path    += [cwd + '/printerServer']
 
 group = DefineGroup('Applications', src, depend = [''], CPPPATH = path)
 

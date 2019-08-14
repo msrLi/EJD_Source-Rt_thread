@@ -13,13 +13,15 @@
 #include <board.h>
 
 #include "ejdLeds.h"
+#include "printerServer.h" 
 
 int main(void)
 {
     /* set LED0 pin mode to output */
     ejdLedApplication();
     // led_on(1);
-	  
+    PrinterProcessCore serverCore;
+    serverCore.construct();
     while (1)
     {
         rt_thread_mdelay(300);

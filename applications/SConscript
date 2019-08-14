@@ -8,6 +8,8 @@ main.cpp
 ledApps/ledblink.c
 ledApps/ejdLeds.c
 printerServer/printerHard.cpp
+printerServer/printerServer.cpp
+wifiModule/wifiServer.cpp
 """)
 
 path    = [cwd, str(Dir('#'))] 

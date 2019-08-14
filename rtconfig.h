@@ -123,7 +123,7 @@
 #define RT_SERIAL_USING_DMA
 #define RT_SERIAL_RB_BUFSZ 64
 /* RT_USING_CAN is not set */
-/* RT_USING_HWTIMER is not set */
+#define RT_USING_HWTIMER
 /* RT_USING_CPUTIME is not set */
 /* RT_USING_I2C is not set */
 #define RT_USING_PIN
@@ -368,6 +368,9 @@
 #define BSP_USING_UART
 #define BSP_USING_UART1
 /* BSP_UART1_RX_USING_DMA is not set */
+#define BSP_USING_TIM
+#define BSP_USING_TIM11
+/* BSP_USING_TIM13 is not set */
 /* BSP_USING_SPI is not set */
 #define BSP_USING_ON_CHIP_FLASH
 /* BSP_USING_I2C1 is not set */

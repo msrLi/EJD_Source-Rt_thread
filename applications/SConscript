@@ -15,6 +15,7 @@ wifiModule/wifiServer.cpp
 path    = [cwd, str(Dir('#'))] 
 path    += [cwd + '/ledApps']
 path    += [cwd + '/printerServer']
+path    += [cwd + '/wifiModule']
 
 group = DefineGroup('Applications', src, depend = [''], CPPPATH = path)
 

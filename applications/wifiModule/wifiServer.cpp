@@ -66,7 +66,7 @@ int32_t WifiServerCore::HwReset()
 
 rt_err_t WifiServerCore::serverReceiveIrq(rt_device_t dev, rt_size_t size)
 {
-    WifiServerCore *thisP = (WifiServerCore*)  dev->user_data;
+    WifiServerCore *thisP = (WifiServerCore*)  dev->private_data;
     struct rx_msg msg;
     rt_err_t result;
     msg.dev = dev;
@@ -137,9 +137,11 @@ int32_t WifiServerCore::transferData(uint8_t *data, rt_size_t size, std::functio
 
 int32_t WifiServerCore::construct()
 {
-    rt_pin_mode(powerPin, PIN_MODE_OUTPUT);
-    rt_pin_mode(resetPin, PIN_MODE_OUTPUT);
+    rt_pin_mode(powerPin, PIN_MODE_OUTPUT_OD);
+    rt_pin_mode(resetPin, PIN_MODE_OUTPUT_OD);
     HwPowerUp();
+    HwReset();
+    rt_kprintf("wifi power on\n");
     /* 初始化消息队列 */
     rt_mq_init(&mMessage, "rx_mq",
                MSG_POOL,                 /* 存放消息的缓冲区 */
@@ -152,7 +154,7 @@ int32_t WifiServerCore::construct()
         rt_kprintf("find %s failed!\n", WIFI_TRANSFER_UART_NAME);
         return RT_ERROR;
     }
-    mTransferDev->user_data = this;
+    mTransferDev->private_data = this;
     /* 以 DMA 接收及轮询发送方式打开串口设备 */
     rt_device_open(mTransferDev, RT_DEVICE_FLAG_DMA_RX);
     /* 设置接收回调函数 */

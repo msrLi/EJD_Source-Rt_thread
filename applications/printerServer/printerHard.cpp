@@ -72,7 +72,7 @@ uint8_t PrinterHardware::EJD_Shift_Fun(uint8_t data)
 
 rt_err_t PrinterHardware::printerTimerCallBack(rt_device_t dev, rt_size_t size)
 {
-    PrinterHardware *thisP = (PrinterHardware*) dev->user_data;
+    PrinterHardware *thisP = (PrinterHardware*) dev->private_data;
 
     thisP->mFunCb(thisP->mBuffer);
     return 0;
@@ -191,7 +191,7 @@ int32_t PrinterHardware::EJD_TimeInit(void)
         rt_kprintf("hwtimer sample run failed! can't find %s device!\n", HWTIMER_DEV_NAME);
         return RT_ERROR;
     }
-    mhw_dev->user_data = this;
+    mhw_dev->private_data = this;
     /* 以读写方式打开设备 */
     ret = rt_device_open(mhw_dev, RT_DEVICE_OFLAG_RDWR);
     if (ret != RT_EOK) {

@@ -368,6 +368,8 @@
 #define BSP_USING_UART
 #define BSP_USING_UART1
 /* BSP_UART1_RX_USING_DMA is not set */
+#define BSP_USING_UART2
+/* BSP_UART2_RX_USING_DMA is not set */
 #define BSP_USING_TIM
 #define BSP_USING_TIM11
 /* BSP_USING_TIM13 is not set */

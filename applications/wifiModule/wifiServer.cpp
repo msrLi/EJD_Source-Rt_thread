@@ -119,6 +119,11 @@ int32_t WifiServerCore::transferData(uint8_t *data, rt_size_t size, std::functio
 {
     mTrensCb = cb;
     mCall = false;
+    return transferData(data, size);
+}
+
+int32_t WifiServerCore::transferData(uint8_t *data, rt_size_t size)
+{
     uint32_t index = size / 1024;
     uint32_t reserved = size % 1024;
     uint8_t *dataPtr = data;
@@ -139,8 +144,10 @@ int32_t WifiServerCore::construct()
 {
     rt_pin_mode(powerPin, PIN_MODE_OUTPUT_OD);
     rt_pin_mode(resetPin, PIN_MODE_OUTPUT_OD);
-    HwPowerUp();
+    // HwPowerUp();
     HwReset();
+    HwPowerDown();
+    return 0;
     rt_kprintf("wifi power on\n");
     /* 初始化消息队列 */
     rt_mq_init(&mMessage, "rx_mq",

@@ -31,6 +31,7 @@ public:
     int32_t HwReset();
 
 public:
+    int32_t transferData(uint8_t *data, rt_size_t size);
     int32_t transferData(uint8_t *data, rt_size_t size, std::function<int32_t (uint8_t *date, rt_size_t &size)> cb);
 
 private:

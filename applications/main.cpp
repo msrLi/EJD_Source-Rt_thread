@@ -28,10 +28,10 @@ int main(void)
 {
     /* set LED0 pin mode to output */
     ejdLedApplication();
-
+#if 0
     serverCore = new PrinterProcessCore();
     serverCore->construct();
-
+#endif
     wifiServer = new WifiServerCore([](uint8_t *date, rt_size_t &size)->void {
 
     });

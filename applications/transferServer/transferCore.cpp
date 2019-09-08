@@ -17,11 +17,11 @@
 #define THREAD_PRIORITY       5
 #define THREAD_STACK_SIZE     512
 #define THREAD_TIMESLICE      10
-#define MEMPOOL_SIZE         (1024*100)
-
+#define MEMPOOL_SIZE         (70)
+#define MEMPOOL_BLOCK_SIZE   (256)
 #define EVENT_FLAGSYNC       (1 << 7)
 
-static rt_uint8_t gMemPool[MEMPOOL_SIZE] = {0};
+static PRINTER_DATA_T gMemPool[MEMPOOL_SIZE] = {0};
 #if 0
 /* 小票信息存储结构体 */
 #pragma pack(1)
@@ -58,14 +58,15 @@ void TransferCore::PrinterPorductor(void *parameter)
                           RT_WAITING_FOREVER, &e) == RT_EOK) {
             rt_kprintf("thread1: OR recv event 0x%x\n", e);
             rt_kprintf("Receive data length=%d\n", thisP->mReceiveDate.lenght);
-            uint32_t bufSize = thisP->mReceiveDate.lenght + sizeof(PRINTER_DATA_T);
+            // uint32_t bufSize = thisP->mReceiveDate.lenght + sizeof(PRINTER_DATA_T);
             uint8_t *bufTemp = (uint8_t *) rt_mp_alloc(&thisP->mMemp, RT_WAITING_FOREVER);
             if (bufTemp == RT_NULL) {
                 rt_kprintf("There is no memory to malloc\n");
             } else {
                 PRINTER_DATA_T *listTemp = (PRINTER_DATA_T *) bufTemp;
                 listTemp->length = thisP->mReceiveDate.lenght;
-                listTemp->addr   = (uint8_t *)(bufTemp + sizeof(PRINTER_DATA_T));
+                rt_memcpy(listTemp->addr,thisP->mReceiveDate.data_buf, listTemp->length);
+                // listTemp->addr   = (uint8_t *)(bufTemp + sizeof(PRINTER_DATA_T));
                 /* 加锁 */
                 rt_mutex_take(thisP->mMutex, RT_WAITING_FOREVER);
                 list_add_tail(&listTemp->list, &thisP->mWaitToSendL);
@@ -82,14 +83,10 @@ void TransferCore::PrinterPorductor(void *parameter)
 
 }
 
-int32_t  TransferCore::TransferDataToService(const PRINTER_DATA_T *pPrinData)
+int32_t  TransferCore::TransferDataToService(const PRINTER_DATA_T &pPrinData)
 {
     uint8_t packageHeader[38];
     int32_t rc = 0;
-    if (pPrinData == NULL) {
-        rt_kprintf("%s Point is NULL", __func__);
-        return -1;
-    }
 
     rt_memset(packageHeader, 0, sizeof(packageHeader));
 
@@ -104,7 +101,7 @@ int32_t  TransferCore::TransferDataToService(const PRINTER_DATA_T *pPrinData)
     packageHeader[8] = 0;
     packageHeader[9] = 0;
     /* 存储数据有效包长度 */
-    uint32_t packageLength = pPrinData->length + 24;
+    uint32_t packageLength = pPrinData.length + 24;
     *((uint32_t*)(&packageHeader[10])) = __ntohl(packageLength);
 
     uint32_t index = 0;
@@ -114,15 +111,15 @@ int32_t  TransferCore::TransferDataToService(const PRINTER_DATA_T *pPrinData)
     *((uint32_t*)(&packageHeader[22])) = __ntohl(mcuId[1]);
     *((uint32_t*)(&packageHeader[26])) = __ntohl(mcuId[2]);
 
-    uint32_t crc32Value = crc32(0, pPrinData->addr, pPrinData->length);
+    uint32_t crc32Value = crc32(0, pPrinData.addr, pPrinData.length);
     *((uint32_t*)(&packageHeader[30])) = __ntohl(crc32Value);
 
-    *((uint32_t*)(&packageHeader[34])) = __ntohl(pPrinData->length);
+    *((uint32_t*)(&packageHeader[34])) = __ntohl(pPrinData.length);
 
     /* wifi send header */
     rc = mWifiService->transferData(packageHeader, 38);
     /* wifi send boady data */
-    rc |= mWifiService->transferData(pPrinData->addr, pPrinData->length);
+    rc |= mWifiService->transferData(pPrinData.addr, pPrinData.length);
 
     /* wait for serverice return */
 
@@ -161,7 +158,7 @@ void TransferCore::PrinterConsumerEntry(void *parameter)
             continue;
         }
         /* send data to serveice */
-        thisP->TransferDataToService(dataPtr);
+        thisP->TransferDataToService(*dataPtr);
 
     }
 }
@@ -199,7 +196,7 @@ int32_t TransferCore::construct()
     }
 
     /* 初始化内存池对象 */
-    rc = rt_mp_init(&mMemp, "Mempool", &gMemPool[0], sizeof(gMemPool), 64);
+    rc = rt_mp_init(&mMemp, "Mempool", &gMemPool[0], sizeof(gMemPool), sizeof(gMemPool[0]));
     if (rc != RT_EOK) {
         rt_kprintf("memory pool failed.\n");
         return -1;

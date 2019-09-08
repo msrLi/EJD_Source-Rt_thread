@@ -23,7 +23,7 @@
 #pragma pack(1)
 typedef struct PRINTER_DATA_TAG {
     uint32_t length; /*<! 小票数据长度 */
-    uint8_t *addr; /*<! 小票数据缓冲指针 */
+    uint8_t addr[2048]; /*<! 小票数据缓冲指针 */
     struct list_head list; /*<! linux 列表 */
 } PRINTER_DATA_T;
 #pragma pack()
@@ -41,7 +41,7 @@ public:
     int32_t destruct();
 
 private:
-    int32_t TransferDataToService(const PRINTER_DATA_T *pPrinData);
+    int32_t TransferDataToService(const PRINTER_DATA_T &pPrinData);
 
 private:
     static void PrinterPorductor(void *parameter);

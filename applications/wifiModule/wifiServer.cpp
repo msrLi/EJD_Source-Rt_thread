@@ -15,7 +15,7 @@
 #define WIFI_POWER_PIN    GET_PIN(E, 3)
 #define WIFI_RESET_PIN    GET_PIN(E, 2)
 
-#define WIFI_TRANSFER_UART_NAME       "uart2"
+#define WIFI_TRANSFER_UART_NAME       "uart3"
 
 #define THREAD_PRIORITY       10
 #define THREAD_STACK_SIZE     512
@@ -101,9 +101,9 @@ void WifiServerCore::wifiServerEntry(void *parameter)
         rx_length = rt_device_read(msg.dev, 0, rx_buffer, msg.size);
         rx_buffer[rx_length] = '\0';
         /* 通过串口设备 serial 输出读取到的消息 */
-        // rt_device_write(serial, 0, rx_buffer, rx_length);
+        /*  rt_device_write(thisP->mTransferDev, 0, rx_buffer, rx_length); */
         /* 打印数据 */
-        // rt_kprintf("%s\n",rx_buffer);
+        /* rt_kprintf("%s\n",rx_buffer); */
 
         if (!thisP->mCall &&  thisP->mFunCb) {
             thisP->mFunCb(rx_buffer, rx_length);
@@ -127,7 +127,6 @@ int32_t WifiServerCore::transferData(const uint8_t *data, rt_size_t size)
     uint32_t index = size / 1024;
     uint32_t reserved = size % 1024;
     const uint8_t *dataPtr = data;
-
     for (uint32_t i = 0; i < index; i++) {
         rt_device_write(mTransferDev, 0, dataPtr, 1024);
         dataPtr += 1024;
@@ -144,10 +143,10 @@ int32_t WifiServerCore::construct()
 {
     rt_pin_mode(powerPin, PIN_MODE_OUTPUT_OD);
     rt_pin_mode(resetPin, PIN_MODE_OUTPUT_OD);
-    // HwPowerUp();
+    HwPowerUp();
     HwReset();
-    HwPowerDown();
-    return 0;
+    // HwPowerDown();
+
     rt_kprintf("wifi power on\n");
     /* 初始化消息队列 */
     rt_mq_init(&mMessage, "rx_mq",

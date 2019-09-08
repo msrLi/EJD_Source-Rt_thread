@@ -76,7 +76,7 @@ const uint32_t g_crc_talbe[256] = { 0x00000000, 0x77073096, 0xee0e612c,
  *      crc32计算结果
  */
 /* --------------------------------------------------------------------------*/
-uint32_t crc32(uint32_t crc, uint8_t *buf, uint32_t length)
+uint32_t crc32(uint32_t crc, const uint8_t *buf, uint32_t length)
 {
     crc ^= 0xffffffff;
     while (length > 8) {

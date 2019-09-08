@@ -9,7 +9,6 @@ ledApps/ledblink.c
 ledApps/ejdLeds.c
 crc32/crc32.c
 printerServer/printerHard.cpp
-printerServer/printerServer.cpp
 wifiModule/wifiServer.cpp
 transferServer/transferCore.cpp
 """)

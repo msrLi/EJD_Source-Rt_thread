@@ -31,8 +31,8 @@ public:
     int32_t HwReset();
 
 public:
-    int32_t transferData(uint8_t *data, rt_size_t size);
-    int32_t transferData(uint8_t *data, rt_size_t size, std::function<int32_t (uint8_t *date, rt_size_t &size)> cb);
+    int32_t transferData(const uint8_t *data, rt_size_t size);
+    int32_t transferData(const uint8_t *data, rt_size_t size, std::function<int32_t (uint8_t *date, rt_size_t &size)> cb);
 
 private:
     static rt_err_t serverReceiveIrq(rt_device_t dev, rt_size_t size);

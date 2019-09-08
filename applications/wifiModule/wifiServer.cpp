@@ -115,18 +115,18 @@ void WifiServerCore::wifiServerEntry(void *parameter)
     }
 }
 
-int32_t WifiServerCore::transferData(uint8_t *data, rt_size_t size, std::function<int32_t (uint8_t *date, rt_size_t &size)> cb)
+int32_t WifiServerCore::transferData(const uint8_t *data, rt_size_t size, std::function<int32_t (uint8_t *date, rt_size_t &size)> cb)
 {
     mTrensCb = cb;
     mCall = false;
     return transferData(data, size);
 }
 
-int32_t WifiServerCore::transferData(uint8_t *data, rt_size_t size)
+int32_t WifiServerCore::transferData(const uint8_t *data, rt_size_t size)
 {
     uint32_t index = size / 1024;
     uint32_t reserved = size % 1024;
-    uint8_t *dataPtr = data;
+    const uint8_t *dataPtr = data;
 
     for (uint32_t i = 0; i < index; i++) {
         rt_device_write(mTransferDev, 0, dataPtr, 1024);

@@ -5,6 +5,7 @@ cwd     = GetCurrentDir()
 CPPPATH = [cwd, str(Dir('#'))]
 src     = Split("""
 main.cpp
+vectoryReconfig.c
 ledApps/ledblink.c
 ledApps/ejdLeds.c
 crc32/crc32.c

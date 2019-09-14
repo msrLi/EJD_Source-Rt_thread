@@ -41,6 +41,7 @@ public:
     int32_t destruct();
 
 private:
+    int32_t TransferCallBack(uint8_t * date, rt_size_t &size);
     int32_t TransferDataToService(const PRINTER_DATA_T &pPrinData);
 
 private:
@@ -60,6 +61,7 @@ private:
     rtthread::Thread          *mProductorThread;
     rt_mutex_t          mMutex;
     rt_sem_t            mListSem;
+    rt_sem_t            mReceiveSem;
     PrinterHardware     *mPrinterHard;
     WifiServerCore      *mWifiService;
     struct rt_event     mEvent;

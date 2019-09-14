@@ -13,12 +13,12 @@
 #include <board.h>
 
 #include "ejdLeds.h"
-#include "printerServer.h"
 #include "wifiServer.h"
+#include "transferCore.h"
+#include "fal.h"
 
 
-PrinterProcessCore *serverCore = NULL;
-WifiServerCore  *wifiServer = NULL;
+TransferCore *transferCore = NULL;
 
 
 #define WIFI_POWER_PIN    GET_PIN(E, 3)
@@ -27,16 +27,20 @@ WifiServerCore  *wifiServer = NULL;
 int main(void)
 {
     /* set LED0 pin mode to output */
+    fal_init();
+    rt_kprintf("Version = V1.0.4\n");
     ejdLedApplication();
+    transferCore = new TransferCore();
+    transferCore->construct();
 #if 0
     serverCore = new PrinterProcessCore();
     serverCore->construct();
-#endif
+
     wifiServer = new WifiServerCore([](uint8_t *date, rt_size_t &size)->void {
 
     });
     wifiServer->construct();
-
+#endif
     while (1) {
         rt_thread_mdelay(300);
 

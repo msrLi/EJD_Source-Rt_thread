@@ -17,7 +17,7 @@
 #define THREAD_PRIORITY       5
 #define THREAD_STACK_SIZE     512
 #define THREAD_TIMESLICE      10
-#define MEMPOOL_SIZE         (70)
+#define MEMPOOL_SIZE         (2)
 #define MEMPOOL_BLOCK_SIZE   (256)
 #define EVENT_FLAGSYNC       (1 << 7)
 
@@ -37,6 +37,7 @@ TransferCore::TransferCore():
     mProductorThread(NULL),
     mMutex(NULL),
     mListSem(NULL),
+    mReceiveSem(NULL),
     mPrinterHard(NULL),
     mWifiService(NULL)
 {
@@ -47,12 +48,25 @@ TransferCore::~TransferCore()
 {
 
 }
+int32_t TransferCore::TransferCallBack(uint8_t * date, rt_size_t &size)
+{
+    rt_kprintf("uart receive data lengtt = %d\n", size);
+    rt_kprintf("data = %s\n", date);
+    if (rt_strstr((const char*) date, "$BYP$")) {
+        rt_kprintf("Compare ok\n");
+        rt_sem_release(mReceiveSem);
+    }
+    return 0;
+}
 
 void TransferCore::PrinterPorductor(void *parameter)
 {
     rt_uint32_t e;
     TransferCore *thisP = (TransferCore*) parameter;
+    rt_thread_mdelay(5000 * 4);
+    int32_t index = 0;
     while (true) {
+#if 0
         if (rt_event_recv(&thisP->mEvent, EVENT_FLAGSYNC,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_FOREVER, &e) == RT_EOK) {
@@ -65,7 +79,7 @@ void TransferCore::PrinterPorductor(void *parameter)
             } else {
                 PRINTER_DATA_T *listTemp = (PRINTER_DATA_T *) bufTemp;
                 listTemp->length = thisP->mReceiveDate.lenght;
-                rt_memcpy(listTemp->addr,thisP->mReceiveDate.data_buf, listTemp->length);
+                rt_memcpy(listTemp->addr, thisP->mReceiveDate.data_buf, listTemp->length);
                 // listTemp->addr   = (uint8_t *)(bufTemp + sizeof(PRINTER_DATA_T));
                 /* 加锁 */
                 rt_mutex_take(thisP->mMutex, RT_WAITING_FOREVER);
@@ -78,6 +92,32 @@ void TransferCore::PrinterPorductor(void *parameter)
         } else {
 
         }
+#else
+        rt_thread_mdelay(5000);
+        rt_kprintf("CREATE  data \n");
+        const char *testData = "Hello world";
+        thisP->mReceiveDate.lenght = rt_strlen(testData);
+        rt_memcpy(thisP->mReceiveDate.data_buf, testData, thisP->mReceiveDate.lenght);
+        rt_sprintf((char *) &thisP->mReceiveDate.data_buf[thisP->mReceiveDate.lenght], "=%d\n", index++);
+        thisP->mReceiveDate.lenght = rt_strlen((char *)thisP->mReceiveDate.data_buf);
+        uint8_t *bufTemp = (uint8_t *) rt_mp_alloc(&thisP->mMemp, RT_WAITING_FOREVER);
+        if (bufTemp == RT_NULL) {
+            rt_kprintf("There is no memory to malloc\n");
+        } else {
+            PRINTER_DATA_T *listTemp = (PRINTER_DATA_T *) bufTemp;
+            listTemp->length = thisP->mReceiveDate.lenght;
+            rt_memcpy(listTemp->addr, thisP->mReceiveDate.data_buf, listTemp->length);
+            /* 加锁 */
+            rt_mutex_take(thisP->mMutex, RT_WAITING_FOREVER);
+            list_add_tail(&listTemp->list, &thisP->mWaitToSendL);
+            rt_mutex_release(thisP->mMutex);
+            /* 增加sem */
+            rt_kprintf("release mListSem\n");
+            rt_sem_release(thisP->mListSem);
+        }
+#endif
+
+
     }
 
 
@@ -117,11 +157,11 @@ int32_t  TransferCore::TransferDataToService(const PRINTER_DATA_T &pPrinData)
     *((uint32_t*)(&packageHeader[34])) = __ntohl(pPrinData.length);
 
     /* wifi send header */
-    rc = mWifiService->transferData(packageHeader, 38);
+    // rc = mWifiService->transferData(packageHeader, 38);
     /* wifi send boady data */
     rc |= mWifiService->transferData(pPrinData.addr, pPrinData.length);
 
-    /* wait for serverice return */
+
 
     return rc;
 }
@@ -130,6 +170,8 @@ void TransferCore::PrinterConsumerEntry(void *parameter)
 {
     rt_err_t result;
     TransferCore *thisP = (TransferCore*) parameter;
+    /* send hellowork to wifi */
+
     while (true) {
         result = rt_sem_take(thisP->mListSem, RT_WAITING_FOREVER);
         if (result != RT_EOK) {
@@ -160,6 +202,22 @@ void TransferCore::PrinterConsumerEntry(void *parameter)
         /* send data to serveice */
         thisP->TransferDataToService(*dataPtr);
 
+        /* wait for serverice return */
+        result = rt_sem_take(thisP->mReceiveSem, 1000);
+        if (result == -RT_ETIMEOUT) {
+            if (result ==  -RT_ETIMEOUT) {
+                /* 发送失败再次填装发送 */
+                rt_mutex_take(thisP->mMutex, RT_WAITING_FOREVER);
+                list_add_tail(&dataPtr->list, &thisP->mWaitToSendL);
+                rt_mutex_release(thisP->mMutex);
+                /* 增加sem */
+                rt_kprintf("add transfer again\n");
+                rt_sem_release(thisP->mListSem);
+            }
+        } else if (result == RT_EOK) {
+            rt_kprintf("release mReceiveSem ok\n");
+            rt_mp_free(dataPtr);
+        }
     }
 }
 
@@ -175,7 +233,6 @@ int32_t TransferCore::construct()
     /* --FIXME-- wifi init */
 
     /* --FIXME-- init data read */
-
     rc  = rt_event_init(&mEvent, "sync event", RT_IPC_FLAG_FIFO);
     if (rc != RT_EOK) {
         rt_kprintf("init event failed.\n");
@@ -191,6 +248,12 @@ int32_t TransferCore::construct()
 
     mListSem = rt_sem_create("list sem", 0, RT_IPC_FLAG_FIFO);
     if (mListSem == RT_NULL) {
+        rt_kprintf("Create sem failed. \n");
+        return -1;
+    }
+
+    mReceiveSem = rt_sem_create("Receive Sem", 0, RT_IPC_FLAG_FIFO);
+    if (mReceiveSem == RT_NULL) {
         rt_kprintf("Create sem failed. \n");
         return -1;
     }
@@ -253,6 +316,8 @@ int32_t TransferCore::construct()
         rc = -2;
     }
 #endif
+#if 0
+    rt_kprintf("LHB %s %d\n", __func__, __LINE__);
     /* --TODO-- init buffer */
     mPrinterHard = new PrinterHardware([this](PRINTER_BUF_T & date)->int32_t {
         rt_memcpy(&mReceiveDate, &date, sizeof(PRINTER_BUF_T));
@@ -264,10 +329,9 @@ int32_t TransferCore::construct()
     } else {
         rc = -1;
     }
-
-    mWifiService = new WifiServerCore([](uint8_t *date, rt_size_t &size)->void {
-        int32_t rc = 0;
-        return;
+#endif
+    mWifiService = new WifiServerCore([this](uint8_t *date, rt_size_t &size)->void {
+        TransferCallBack(date, size);
     });
 
     if (mWifiService != NULL) {
@@ -285,6 +349,7 @@ int32_t TransferCore::destruct()
 #endif
     rt_mutex_delete(mMutex);
     rt_sem_delete(mListSem);
+    rt_sem_delete(mReceiveSem);
 
     rt_event_detach(&mEvent);
     mPrinterHard->destruct();

@@ -229,9 +229,9 @@
 /* PKG_USING_TENCENT_IOTHUB is not set */
 /* PKG_USING_NIMBLE is not set */
 #define PKG_USING_OTA_DOWNLOADER
-/* OTA_DOWNLOADER_DEBUG is not set */
+#define OTA_DOWNLOADER_DEBUG
 /* PKG_USING_HTTP_OTA is not set */
-/* PKG_USING_YMODEM_OTA is not set */
+#define PKG_USING_YMODEM_OTA
 /* PKG_USING_OTA_DOWNLOADER_V100 is not set */
 #define PKG_USING_OTA_DOWNLOADER_LATEST_VERSION
 /* PKG_USING_IPMSG is not set */
@@ -325,6 +325,7 @@
 /* PKG_USING_NRF24L01 is not set */
 /* PKG_USING_TOUCH_DRIVERS is not set */
 /* PKG_USING_LCD_DRIVERS is not set */
+/* PKG_USING_MAX17048 is not set */
 
 /* miscellaneous packages */
 
@@ -341,6 +342,8 @@
 /* PKG_USING_TINYFRAME is not set */
 /* PKG_USING_KENDRYTE_DEMO is not set */
 /* PKG_USING_DIGITALCTRL is not set */
+/* PKG_USING_UPACKER is not set */
+/* PKG_USING_UPARAM is not set */
 
 /* samples: kernel and components samples */
 
@@ -368,8 +371,13 @@
 #define BSP_USING_UART
 #define BSP_USING_UART1
 /* BSP_UART1_RX_USING_DMA is not set */
+#define BSP_UART1_TX_USING_DMA
 #define BSP_USING_UART2
 /* BSP_UART2_RX_USING_DMA is not set */
+#define BSP_UART2_TX_USING_DMA
+#define BSP_USING_UART3
+#define BSP_UART3_RX_USING_DMA
+/* BSP_UART3_TX_USING_DMA is not set */
 #define BSP_USING_TIM
 #define BSP_USING_TIM11
 /* BSP_USING_TIM13 is not set */

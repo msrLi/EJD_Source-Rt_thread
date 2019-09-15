@@ -378,9 +378,7 @@
 #define BSP_USING_UART3
 #define BSP_UART3_RX_USING_DMA
 /* BSP_UART3_TX_USING_DMA is not set */
-#define BSP_USING_TIM
-#define BSP_USING_TIM11
-/* BSP_USING_TIM13 is not set */
+/* BSP_USING_TIM is not set */
 /* BSP_USING_SPI is not set */
 #define BSP_USING_ON_CHIP_FLASH
 /* BSP_USING_I2C1 is not set */

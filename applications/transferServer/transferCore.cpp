@@ -316,7 +316,7 @@ int32_t TransferCore::construct()
         rc = -2;
     }
 #endif
-#if 0
+
     rt_kprintf("LHB %s %d\n", __func__, __LINE__);
     /* --TODO-- init buffer */
     mPrinterHard = new PrinterHardware([this](PRINTER_BUF_T & date)->int32_t {
@@ -329,7 +329,7 @@ int32_t TransferCore::construct()
     } else {
         rc = -1;
     }
-#endif
+
     mWifiService = new WifiServerCore([this](uint8_t *date, rt_size_t &size)->void {
         TransferCallBack(date, size);
     });

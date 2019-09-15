@@ -41,6 +41,9 @@ public:
     int32_t construct();
     int32_t destruct();
 
+public:
+    friend  void timeout2(void *parameter);
+
 private:
     int32_t EJD_PinInit(void);
     int32_t EJD_PinUnint(void);
@@ -59,6 +62,7 @@ private:
 private:
     std::function<int32_t (PRINTER_BUF_T &date)> mFunCb;
     rt_device_t   mhw_dev;
+    rt_timer_t    mSoftTimer;
     PRINTER_BUF_T mBuffer;
 
 };

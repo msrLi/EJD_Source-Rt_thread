@@ -77,6 +77,13 @@ rt_err_t PrinterHardware::printerTimerCallBack(rt_device_t dev, rt_size_t size)
     thisP->mFunCb(thisP->mBuffer);
     return 0;
 }
+/* 定时器 2 超时函数 */
+void timeout2(void *parameter)
+{
+    PrinterHardware *thisP = (PrinterHardware*) parameter;
+    thisP->mFunCb(thisP->mBuffer);
+    rt_kprintf("one shot timer is timeout\n");
+}
 
 void PrinterHardware::printerStorageData(void *args)
 {
@@ -93,6 +100,15 @@ void PrinterHardware::printerStorageData(void *args)
         /* 开始定时器 */
 #ifdef BSP_USING_TIM11
         thisP->EJD_PrinterTimerStart();
+#else
+        if (thisP->mSoftTimer != RT_NULL) {
+            /* reset the timeout of thread timer and start it */
+            uint32_t timeOut = RT_TICK_PER_SECOND;
+            rt_timer_control(thisP->mSoftTimer,
+                             RT_TIMER_CTRL_SET_TIME,
+                             &timeOut);
+            rt_timer_start(thisP->mSoftTimer);
+        }
 #endif
     }
 
@@ -210,6 +226,10 @@ int32_t PrinterHardware::EJD_TimeInit(void)
         rt_kprintf("set mode failed! ret is :%d\n", ret);
         return ret;
     }
+#else
+    mSoftTimer = rt_timer_create("printerTimer", timeout2,
+                                 this, RT_TICK_PER_SECOND,
+                                 RT_TIMER_FLAG_ONE_SHOT);
 #endif
 }
 

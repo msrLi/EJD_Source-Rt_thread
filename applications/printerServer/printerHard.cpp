@@ -265,6 +265,10 @@ int32_t PrinterHardware::EJD_PinUnint(void)
         rt_device_close(mhw_dev);
         mhw_dev = RT_NULL;
     }
+    if (mSoftTimer) {
+        rt_timer_delete(mSoftTimer);
+        mSoftTimer = RT_NULL;
+    }
     return 0;
 }
 
